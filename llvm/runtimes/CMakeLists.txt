@@ -165,6 +165,8 @@ if(compiler_rt_path)
   endif()
 endif()
 
+unset(Python3_COPYRIGHT)
+
 # Create a list with the names of all the runtime projects in all uppercase and
 # with dashes turned to underscores. This gives us the CMake variable `prefixes`
 # for all variables that will apply to runtimes.
@@ -175,6 +177,7 @@ foreach(entry ${runtimes})
   list(APPEND prefixes ${canon_name})
   if (${canon_name} STREQUAL "OPENMP")
     list(APPEND prefixes "LIBOMP" "LIBOMPTARGET")
+    list(APPEND prefixes "Python")
   endif()
   # Many compiler-rt options start with SANITIZER_ and DARWIN_ rather than
   # COMPILER_RT_, so when compiler-rt is enabled, consider both.
