@@ -2,6 +2,7 @@
 #define SHM_PLUGIN_HPP
 
 #include "PluginInterface.h"
+#include "shm_debug.hpp"
 
 namespace llvm {
 namespace omp {
@@ -21,31 +22,26 @@ struct ShmPluginTy : GenericPluginTy {
   virtual ~ShmPluginTy() {}
 
   /// Initialize the plugin and return the number of available devices.
-  virtual Expected<int32_t> initImpl() override { }
+  virtual Expected<int32_t> initImpl() override { SHM_TRACE_FN; return 1; }
 
   /// Deinitialize the plugin and release the resources.
-  virtual Error deinitImpl() override { }
+  virtual Error deinitImpl() override { SHM_TRACE_FN; return Plugin::success(); }
 
   /// Get the ELF code to recognize the binary image of this plugin.
-  virtual uint16_t getMagicElfBits() const override { }
+  virtual uint16_t getMagicElfBits() const override { SHM_TRACE_FN; return ELF::EM_X86_64; }
 
   /// Get the target triple of this plugin.
-  virtual Triple::ArchType getTripleArch() const override { }
-
-  /// Indicate whether data can be exchanged directly between two devices under
-  /// this same plugin. If this function returns true, it's safe to call the
-  /// GenericDeviceTy::exchangeData() function on the source device.
-  virtual bool isDataExchangable(int32_t SrcDeviceId, int32_t DstDeviceId) override {
-    return isValidDeviceId(SrcDeviceId) && isValidDeviceId(DstDeviceId);
-  }
+  virtual Triple::ArchType getTripleArch() const override { SHM_TRACE_FN; return Triple::x86_64; }
 
   /// Indicate if an image is compatible with the plugin devices. Notice that
   /// this function may be called before actually initializing the devices. So
   /// we could not move this function into GenericDeviceTy.
-  virtual Expected<bool> isImageCompatible(__tgt_image_info *Info) const override { }
-
-  /// Indicate whether the plugin supports empty images.
-  virtual bool supportsEmptyImages() const override { return false; }
+  virtual Expected<bool> isImageCompatible(__tgt_image_info *Info) const override {
+    SHM_TRACE_FN;
+    // TODO: check arch
+    SHM_DP("%s", Info->Arch);
+    return true;
+  }
 };
 
 GenericPluginTy *Plugin::createPlugin() { return new ShmPluginTy(); }

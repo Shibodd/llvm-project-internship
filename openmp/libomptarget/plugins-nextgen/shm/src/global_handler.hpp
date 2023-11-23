@@ -2,6 +2,7 @@
 #define SHM_GLOBAL_HANDLER_HPP
 
 #include "PluginInterface.h"
+#include "shm_debug.hpp"
 
 namespace llvm {
 namespace omp {
@@ -22,7 +23,10 @@ public:
   /// \p DeviceGlobal.
   virtual Error getGlobalMetadataFromDevice(GenericDeviceTy &Device,
                                             DeviceImageTy &Image,
-                                            GlobalTy &DeviceGlobal) override { }
+                                            GlobalTy &DeviceGlobal) override {
+    SHM_NOT_IMPLEMENTED;
+    return Plugin::success();
+  }
 };
 
 GenericGlobalHandlerTy *Plugin::createGlobalHandler() {
