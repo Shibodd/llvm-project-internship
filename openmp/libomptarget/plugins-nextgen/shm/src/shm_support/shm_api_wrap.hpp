@@ -22,7 +22,7 @@ static llvm::Error wrap_shm_open(const std::string& name, int& file_out, bool cr
 
   int file = shm_open(name.c_str(), flags, S_IREAD | S_IWRITE);
   if (file < 0)
-    return make_err_msg("Could not open the shared memory object.");
+    return make_err_withno("Could not open the shared memory object.");
 
   file_out = file;
   return make_success();
@@ -39,28 +39,35 @@ static llvm::Error wrap_shm_mmap(int file, size_t size, void*& address_out) {
 
 static llvm::Error wrap_ftruncate(int file, size_t size) {
   if (ftruncate(file, size) != 0)
-    return make_err_msg("Could not resize the shared memory object.");
+    return make_err_withno("Could not resize the shared memory object.");
   return make_success();
 }
 
 static llvm::Error wrap_munmap(void* address, size_t size) {
   if (munmap(address, size) != 0)
-    return make_err_msg("Could not munmap the shared memory object.");
+    return make_err_withno("Could not munmap the shared memory object.");
   return make_success();
 }
 
 static llvm::Error wrap_close(int file) {
   if (close(file) != 0)
-    return make_err_msg("Could not close the shared memory object.");
+    return make_err_withno("Could not close the shared memory object.");
   return make_success();
 }
 
 static llvm::Error wrap_fstat_size(int file, size_t& size) {
   struct stat buf;
   if (fstat(file, &buf) != 0)
-    return make_err_msg("Could not get shared memory object length.");
+    return make_err_withno("Could not get shared memory object length.");
     
   size = buf.st_size;
+  return make_success();
+}
+
+static llvm::Error wrap_shm_unlink(const std::string& name) {
+  if (shm_unlink(name.c_str()) != 0)
+    return make_err_withno("Couldn't unlink shared memory object.");
+  
   return make_success();
 }
 

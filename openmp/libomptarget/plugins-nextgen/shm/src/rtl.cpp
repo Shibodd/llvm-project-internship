@@ -2,6 +2,8 @@ struct ShmKernelTy;
 struct ShmDeviceTy;
 struct ShmPluginTy;
 struct ShmGlobalHandlerTy;
+struct ShmDeviceImageTy;
+#include "device_image.hpp"
 #include "kernel.hpp"
 #include "device.hpp"
 #include "global_handler.hpp"

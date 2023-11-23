@@ -25,7 +25,7 @@ static constexpr GV HsmGridValues = {
 struct ShmDeviceTy : public GenericDeviceTy {
   ShmDeviceTy(int32_t DeviceId, int32_t NumDevices)
       : GenericDeviceTy(DeviceId, NumDevices, HsmGridValues),
-        ctrlShmObject("/shm_dev" + std::to_string(DeviceId) + "_ctrl") {}
+        ctrlShmObject("/shm_ctrl" + std::to_string(DeviceId)) {}
 
   /// Allocate a memory of size \p Size . \p HstPtr is used to assist the
   /// allocation.
@@ -64,16 +64,27 @@ struct ShmDeviceTy : public GenericDeviceTy {
   virtual Error deinitImpl() override {
     SHM_TRACE_FN;
     ctrlShmObject.close();
+
+    for (DeviceImageTy *Image : LoadedImages) {
+      ShmDeviceImageTy &ShmImage = static_cast<ShmDeviceImageTy &>(*Image);
+
+      if (auto Err = (ShmImage.delete_shm_object()))
+        return Err;
+    }
+
     return Plugin::success();
   }
 
   /// Load the binary image into the device and return the target table.
   virtual Expected<DeviceImageTy *> loadBinaryImpl(const __tgt_device_image *TgtImage, int32_t ImageId) override {
-    SHM_NOT_IMPLEMENTED;
+    SHM_TRACE_FN;
 
     // Allocate and initialize the image object.
-    DeviceImageTy *Image = Plugin::get().allocate<DeviceImageTy>();
-    new (Image) DeviceImageTy(ImageId, TgtImage);
+    ShmDeviceImageTy *Image = Plugin::get().allocate<ShmDeviceImageTy>();
+    new (Image) ShmDeviceImageTy(ImageId, TgtImage);
+
+    if (auto err = Image->create_shm_object())
+      return err;
 
     return Image;
   }
@@ -214,22 +225,10 @@ private:
   /// Get and set the stack size and heap size for the device. If not used, the
   /// plugin can implement the setters as no-op and setting the output
   /// value to zero for the getters.
-  virtual Error getDeviceStackSize(uint64_t &V) override {
-    SHM_NOT_IMPLEMENTED;
-    return Plugin::success();
-  }
-  virtual Error setDeviceStackSize(uint64_t V) override {
-    SHM_NOT_IMPLEMENTED;
-    return Plugin::success();
-  }
-  virtual Error getDeviceHeapSize(uint64_t &V) override{
-    SHM_NOT_IMPLEMENTED;
-    return Plugin::success();
-  }
-  virtual Error setDeviceHeapSize(uint64_t V) override {
-    SHM_NOT_IMPLEMENTED;
-    return Plugin::success();
-  }
+  virtual Error getDeviceStackSize(uint64_t &V) override { SHM_TRACE_FN; V = 0; return Plugin::success(); }
+  virtual Error setDeviceStackSize(uint64_t V) override { SHM_TRACE_FN; return Plugin::success(); }
+  virtual Error getDeviceHeapSize(uint64_t &V) override{ SHM_TRACE_FN; V = 0; return Plugin::success(); }
+  virtual Error setDeviceHeapSize(uint64_t V) override { SHM_TRACE_FN; return Plugin::success(); }
 };
 
 GenericDeviceTy *Plugin::createDevice(int32_t DeviceId, int32_t NumDevices) {

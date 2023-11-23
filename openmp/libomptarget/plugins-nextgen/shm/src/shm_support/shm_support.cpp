@@ -69,3 +69,8 @@ void ShmObject::close() {
   address = nullptr;
   opened = false;
 }
+
+void ShmObject::unlink() {
+  close();
+  static_cast<void>(wrap_shm_unlink(name));
+}
