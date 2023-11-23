@@ -11,7 +11,7 @@ add_definitions(-DDEBUG_PREFIX="TARGET shm RTL")
 add_llvm_library("omptarget.rtl.shm"
   SHARED
 
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/rtl.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/rtl.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/shm_support/shm_support.cpp
 
   ADDITIONAL_HEADER_DIRS
   ${LIBOMPTARGET_INCLUDE_DIR}

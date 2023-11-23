@@ -5,7 +5,7 @@
 #include "Debug.h" // Libomptarget Debug (for DP)
 
 #define SHM_DP(s, ...) DP("[%s] " s "\n", __func__ __VA_OPT__(,) __VA_ARGS__)
-#define SHM_NOT_IMPLEMENTED SHM_DP("Not implemented!\n")
+#define SHM_NOT_IMPLEMENTED SHM_DP("Not implemented!")
 
 
 #ifdef SHM_TRACE_ENABLED
