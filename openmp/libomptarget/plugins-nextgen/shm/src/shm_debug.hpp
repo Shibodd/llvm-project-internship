@@ -9,7 +9,7 @@
 
 
 #ifdef SHM_TRACE_ENABLED
-#define SHM_TRACE_FN DP("Entering " __func__ ".")
+#define SHM_TRACE_FN DP("Entering %s.\n", __func__)
 #else
 #define SHM_TRACE_FN
 #endif // SHM_TRACE_ENABLED

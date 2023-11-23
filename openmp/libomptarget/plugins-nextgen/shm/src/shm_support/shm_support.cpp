@@ -4,41 +4,66 @@
 
 #include <string>
 
-Err ShmObject::open(size_t size_in) {
+llvm::Error ShmObject::create(size_t size_in) {
   if (opened)
     return make_err_msg("The shared memory object was already open!");
 
-  Err err;
+  if (auto err = wrap_shm_open(name, file, true))
+    return err;
 
-  if ((err = wrap_shm_open(name, file)))
-  if ((err = wrap_ftruncate(file, size_in)))
-  if ((err = wrap_shm_mmap(file, size_in, address))) {
-    opened = true;
-    size = size_in;
-    return make_success();
+  if (auto err = wrap_ftruncate(file, size_in)) {
+    static_cast<void>(wrap_close(file));
+    return err;
   }
 
-  if (file >= 0)
-    wrap_close(file);
+  if (auto err = wrap_shm_mmap(file, size_in, address)) {
+    static_cast<void>(wrap_close(file));
+    return err;
+  }
 
-  return err;
+  opened = true;
+  size = size_in;
+  return make_success();
 }
 
-Err ShmObject::resize(size_t new_size) {
+llvm::Error ShmObject::open() {
+  if (opened)
+    return make_err_msg("The shared memory object was already open!");
+
+  if (auto err = wrap_shm_open(name, file, false))
+    return err;
+
+  if (auto err = wrap_fstat_size(file, size)) {
+    static_cast<void>(wrap_close(file));
+    return err;
+  }
+
+  if (auto err = wrap_shm_mmap(file, size, address)) {
+    static_cast<void>(wrap_close(file));
+    return err;
+  }
+
+  opened = true;
+  return make_success();
+}
+
+/*
+ShmError ShmObject::resize(size_t new_size) {
   if (!opened)
     return make_err_msg("This shared memory object is not open!");
     
-  Err err;
+  ShmError err;
   if (!(err = wrap_ftruncate(file, new_size)))
     return err;
 
   size = new_size;
   return make_success();
 }
+*/
 
 void ShmObject::close() {
-  wrap_munmap(address, size);
-  wrap_close(file);
+  static_cast<void>(wrap_munmap(address, size));
+  static_cast<void>(wrap_close(file));
 
   file = -1;
   address = nullptr;

@@ -2,16 +2,7 @@
 #define SHM_SUPPORT_HPP
 
 #include <string>
-
-struct Err {
-  bool ok;
-  std::string err_msg;
-
-  Err();
-  Err(std::string err_msg);
-
-  operator bool() { return ok; }
-};
+#include "llvm/Support/Error.h"
 
 class ShmObject {
   std::string name;
@@ -25,9 +16,11 @@ public:
   ShmObject(const std::string& name, size_t size, void* address, int file)
     : name(name), size(size), address(address), file(file) { }
 
-  Err open(size_t size);
-  Err resize(size_t new_size);
+  llvm::Error open();
+  llvm::Error create(size_t size);
   void close();
+
+  inline bool is_open() { return opened; }
 };
 
 #endif // !SHM_SUPPORT_HPP

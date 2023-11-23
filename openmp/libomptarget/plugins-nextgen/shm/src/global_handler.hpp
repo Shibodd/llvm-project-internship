@@ -30,6 +30,7 @@ public:
 };
 
 GenericGlobalHandlerTy *Plugin::createGlobalHandler() {
+  SHM_TRACE_FN;
   return new ShmGlobalHandlerTy();
 }
 

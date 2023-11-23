@@ -3,8 +3,8 @@
 
 #include "PluginInterface.h"
 #include "llvm/Frontend/OpenMP/OMPGridValues.h"
+#include "shm_support/shm_support.hpp"
 #include "shm_debug.hpp"
-
 
 namespace llvm {
 namespace omp {
@@ -24,7 +24,8 @@ static constexpr GV HsmGridValues = {
 
 struct ShmDeviceTy : public GenericDeviceTy {
   ShmDeviceTy(int32_t DeviceId, int32_t NumDevices)
-      : GenericDeviceTy(DeviceId, NumDevices, HsmGridValues) {}
+      : GenericDeviceTy(DeviceId, NumDevices, HsmGridValues),
+        ctrlShmObject("/shm_dev" + std::to_string(DeviceId) + "_ctrl") {}
 
   /// Allocate a memory of size \p Size . \p HstPtr is used to assist the
   /// allocation.
@@ -43,14 +44,17 @@ struct ShmDeviceTy : public GenericDeviceTy {
   /// Set the context of the device if needed, before calling device-specific
   /// functions. Plugins may implement this function as a no-op if not needed.
   virtual Error setContext() override {
-    SHM_NOT_IMPLEMENTED;
+    SHM_TRACE_FN;
     return Plugin::success();
   }
 
   /// Initialize the device. After this call, the device should be already
   /// working and ready to accept queries or modifications.
   virtual Error initImpl(GenericPluginTy &Plugin) override {
-    SHM_NOT_IMPLEMENTED;
+    SHM_TRACE_FN;
+    if (auto err = ctrlShmObject.open())
+      return err;
+
     return Plugin::success();
   }
 
@@ -58,7 +62,8 @@ struct ShmDeviceTy : public GenericDeviceTy {
   /// device is no longer considered ready, so no queries or modifications are
   /// allowed.
   virtual Error deinitImpl() override {
-    SHM_NOT_IMPLEMENTED;
+    SHM_TRACE_FN;
+    ctrlShmObject.close();
     return Plugin::success();
   }
 
@@ -190,6 +195,7 @@ struct ShmDeviceTy : public GenericDeviceTy {
   }
 
 private:
+  ShmObject ctrlShmObject;
 
   /// Allocate and construct a kernel object.
   virtual Expected<GenericKernelTy &>
@@ -227,6 +233,7 @@ private:
 };
 
 GenericDeviceTy *Plugin::createDevice(int32_t DeviceId, int32_t NumDevices) {
+  SHM_TRACE_FN;
   return new ShmDeviceTy(DeviceId, NumDevices);
 }
 

@@ -7,6 +7,7 @@ add_definitions("-DTARGET_NAME=shm")
 # Define debug prefix. TODO: This should be automatized in the Debug.h but
 # it requires changing the original plugins.
 add_definitions(-DDEBUG_PREFIX="TARGET shm RTL")
+add_definitions(-DSHM_TRACE_ENABLED=1)
 
 add_llvm_library("omptarget.rtl.shm"
   SHARED

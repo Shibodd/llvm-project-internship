@@ -37,12 +37,13 @@ struct ShmPluginTy : GenericPluginTy {
   /// this function may be called before actually initializing the devices. So
   /// we could not move this function into GenericDeviceTy.
   virtual Expected<bool> isImageCompatible(__tgt_image_info *Info) const override {
-    SHM_DP("TODO: Check arch %s\n", Info->Arch);
+    SHM_TRACE_FN;
+    // Maybe check if the file exists here?
     return true;
   }
 };
 
-GenericPluginTy *Plugin::createPlugin() { return new ShmPluginTy(); }
+GenericPluginTy *Plugin::createPlugin() { SHM_TRACE_FN; return new ShmPluginTy(); }
 
 } // namespace plugin
 } // namespace target
