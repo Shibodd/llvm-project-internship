@@ -65,7 +65,12 @@ struct ShmDeviceTy : public GenericDeviceTy {
   /// Load the binary image into the device and return the target table.
   virtual Expected<DeviceImageTy *> loadBinaryImpl(const __tgt_device_image *TgtImage, int32_t ImageId) override {
     SHM_NOT_IMPLEMENTED;
-    return nullptr;
+
+    // Allocate and initialize the image object.
+    DeviceImageTy *Image = Plugin::get().allocate<DeviceImageTy>();
+    new (Image) DeviceImageTy(ImageId, TgtImage);
+
+    return Image;
   }
 
   /// Synchronize the current thread with the pending operations on the
