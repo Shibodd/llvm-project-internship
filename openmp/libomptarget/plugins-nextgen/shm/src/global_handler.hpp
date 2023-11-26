@@ -25,6 +25,13 @@ public:
                                             DeviceImageTy &Image,
                                             GlobalTy &DeviceGlobal) override {
     SHM_NOT_IMPLEMENTED;
+
+    GlobalTy HostGlobal("__omp_rtl_device_environment", 0, nullptr);
+    if (auto err = getGlobalMetadataFromImage(Device, Image, HostGlobal)) 
+      DP("MYCODE Global not found\n");
+    else
+      DP("MYCODE Global found at %p\n", HostGlobal.getPtr());
+
     return Plugin::success();
   }
 };
