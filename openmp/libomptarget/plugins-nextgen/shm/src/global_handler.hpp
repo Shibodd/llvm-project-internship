@@ -2,7 +2,7 @@
 #define SHM_GLOBAL_HANDLER_HPP
 
 #include "PluginInterface.h"
-#include "shm_debug.hpp"
+#include "shm_helpers/shm_debug.hpp"
 
 namespace llvm {
 namespace omp {

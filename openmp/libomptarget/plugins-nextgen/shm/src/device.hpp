@@ -4,7 +4,7 @@
 #include "PluginInterface.h"
 #include "llvm/Frontend/OpenMP/OMPGridValues.h"
 #include "shm_support/shm_support.hpp"
-#include "shm_debug.hpp"
+#include "shm_helpers/shm_debug.hpp"
 
 namespace llvm {
 namespace omp {
@@ -52,8 +52,8 @@ struct ShmDeviceTy : public GenericDeviceTy {
   /// working and ready to accept queries or modifications.
   virtual Error initImpl(GenericPluginTy &Plugin) override {
     SHM_TRACE_FN;
-    if (auto err = ctrlShmObject.open())
-      return err;
+    //if (auto err = ctrlShmObject.open())
+    //  return err;
 
     return Plugin::success();
   }

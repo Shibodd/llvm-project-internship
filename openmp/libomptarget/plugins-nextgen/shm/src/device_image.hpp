@@ -2,8 +2,9 @@
 #define SHM_DEVICE_IMAGE_HPP
 
 #include "PluginInterface.h"
-#include "shm_debug.hpp"
+#include "shm_helpers/shm_debug.hpp"
 #include "shm_support/shm_support.hpp"
+#include <fstream>
 
 namespace llvm {
 namespace omp {
@@ -17,13 +18,11 @@ struct ShmDeviceImageTy : public DeviceImageTy {
   Error create_shm_object() {
     SHM_TRACE_FN;
     assert(!shm_object.is_open() && "The SHM object is already opened.");
-    
-    size_t size = getSize();
-    if (auto err = shm_object.create(size))
-      return err;
 
-    void* addr = shm_object.get_address();
-    std::memcpy(addr, getStart(), size);
+    std::ofstream file;
+    file.open("/home/sbondi/workspace/test/openmp_IR/devimg.img", std::ios::binary | std::ios::trunc);
+    file.write(static_cast<char*>(getStart()), getSize());
+    file.close();
 
     return Plugin::success();
   }

@@ -1,5 +1,5 @@
 #include "shm_support.hpp"
-#include "shm_errs.hpp"
+#include "../shm_helpers/shm_errs.hpp"
 #include "shm_api_wrap.hpp"
 
 #include <string>

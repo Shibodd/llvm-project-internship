@@ -12,7 +12,7 @@ extern "C" {
 }
 
 #include "shm_support.hpp"
-#include "shm_errs.hpp"
+#include "../shm_helpers/shm_errs.hpp"
 
 static llvm::Error wrap_shm_open(const std::string& name, int& file_out, bool create) {
   int flags = O_RDWR;
