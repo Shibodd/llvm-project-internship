@@ -1,10 +1,10 @@
 #include <cstring>
 #include <cassert>
 
-#include "span.hpp"
-#include "elf_view.hpp"
+#include "../shm_helpers/span.hpp"
 #include "Debug.h"
-#include <elf.h>
+
+#include "elf_view.hpp"
 
 
 Span<char> ElfView::make_symbol_string_table() {

@@ -2,7 +2,7 @@
 #define ELF_VIEW_HPP
 
 #include <cassert>
-#include "span.hpp"
+#include "../shm_helpers/span.hpp"
 #include "elf.h"
 
 // Provides an ELF file view over a range of memory

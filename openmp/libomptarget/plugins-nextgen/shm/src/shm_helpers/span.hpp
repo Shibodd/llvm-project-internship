@@ -21,6 +21,8 @@ public:
 
   inline size_t len() { return end() - begin(); }
   T& operator [] (size_t index) const { return begin()[index]; }
+
+  static Span<T> empty() { return Span(); }
 };
 
 

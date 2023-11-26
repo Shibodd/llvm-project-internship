@@ -63,10 +63,11 @@ void ElfLoader::copy_segments_to_mem() {
 
 llvm::Error ElfLoader::load() {
   size_t len = get_mmap_len();
-  
-  errno = 0;
-  mapped_memory = mapper(len);
-  ASSERT_OR_PERR(mapped_memory.len() == len, "Failed to map memory!");
+  auto mapped = mapper(len);
+  if (!mapped)
+    return mapped.takeError();
+  mapped_memory = *mapped;
+  assert(mapped_memory.len() >= len);
 
   copy_segments_to_mem();
   fixup_relocations();
@@ -116,6 +117,7 @@ void ElfLoader::fixup_relocations() {
   }
 }
 
-void ElfLoader::unload() {
+llvm::Error ElfLoader::unload() {
   unmapper(mapped_memory);
+  return make_success();
 }

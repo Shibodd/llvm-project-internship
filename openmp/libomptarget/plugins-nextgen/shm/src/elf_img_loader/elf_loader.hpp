@@ -14,8 +14,8 @@ struct Mapper {
 
 // Provides a way to load an ELF in memory and execute symbols
 class ElfLoader {
-  using Mapper = std::function<Span<char>(size_t)>;
-  using Unmapper = std::function<void(Span<char>)>;
+  using Mapper = std::function<llvm::Expected<Span<char>>(size_t)>;
+  using Unmapper = std::function<llvm::Error(Span<char>)>;
 
   Span<char> mapped_memory;
   std::vector<char> elf_file;
@@ -34,7 +34,7 @@ public:
   ElfLoader(Span<char> elf_file, Mapper mapper, Unmapper unmapper);
 
   llvm::Error load();
-  void unload();
+  llvm::Error unload();
 
   template <typename T>
   T get_symbol_addr(const char* name) {
