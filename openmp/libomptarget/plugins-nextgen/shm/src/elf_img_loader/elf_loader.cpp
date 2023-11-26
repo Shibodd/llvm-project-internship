@@ -4,9 +4,9 @@
 #include <cassert>
 #include <cstring>
 #include <fstream>
-#include "shm_helpers/shm_errs.hpp"
-#include "elf_img_loader/elf_view.hpp"
-#include "elf_img_loader/elf_loader.hpp"
+#include "../shm_helpers/shm_errs.hpp"
+#include "elf_view.hpp"
+#include "elf_loader.hpp"
 
 extern "C" {
 #include <unistd.h>

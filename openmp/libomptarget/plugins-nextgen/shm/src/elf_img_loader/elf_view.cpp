@@ -1,8 +1,8 @@
 #include <cstring>
 #include <cassert>
 
-#include "elf_img_loader/span.hpp"
-#include "elf_img_loader/elf_view.hpp"
+#include "span.hpp"
+#include "elf_view.hpp"
 #include "Debug.h"
 #include <elf.h>
 
