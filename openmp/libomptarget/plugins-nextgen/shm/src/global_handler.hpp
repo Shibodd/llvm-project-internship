@@ -24,7 +24,12 @@ public:
   virtual Error getGlobalMetadataFromDevice(GenericDeviceTy &Device,
                                             DeviceImageTy &Image,
                                             GlobalTy &DeviceGlobal) override {
-    SHM_NOT_IMPLEMENTED;
+    SHM_TRACE_FN;
+    ShmDeviceImageTy& shmImage = static_cast<ShmDeviceImageTy&>(Image);
+
+    DP("Looking for %s\n", DeviceGlobal.getName().c_str());
+    DeviceGlobal.setPtr((void*)shmImage.get_symbol_addr(DeviceGlobal.getName().c_str()));
+
     return Plugin::success();
   }
 };

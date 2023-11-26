@@ -26,7 +26,8 @@ struct ShmDeviceImageTy : public DeviceImageTy {
 
   Error create_shm_object() {
     SHM_TRACE_FN;
-    
+    return elf_loader.load();
+
 
     /* // Dump the image for debug
     std::ofstream file;
@@ -34,14 +35,14 @@ struct ShmDeviceImageTy : public DeviceImageTy {
     file.write(static_cast<char*>(getStart()), getSize());
     file.close();
     */
-
-    return elf_loader.load();
   }
 
   Error delete_shm_object() {
     SHM_TRACE_FN;
     return elf_loader.unload();
   }
+
+  uintptr_t get_symbol_addr(const char* name) { return elf_loader.get_symbol_addr(name); }
 
 private:
   ShmObject shm_object;

@@ -35,7 +35,7 @@ T* find_single_in_span(Span<T> ts, std::function<bool(const T&)> predicate) {
       ans = &t;
     }
   }
-  assert(ans != nullptr && "No section matches the criteria!");
+  assert(ans != nullptr && "No item matches the criteria!");
   return ans;
 }
 

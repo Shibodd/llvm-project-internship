@@ -9,7 +9,7 @@
 
 Span<char> ElfView::make_symbol_string_table() {
   Elf64_Shdr* phdr = find_single_in_span<Elf64_Shdr>(section_headers, [this] (const Elf64_Shdr& phdr) { 
-    return strcmp(section_string_table.begin() + phdr.sh_name, ".dynstr") == 0; 
+    return strcmp(section_string_table.begin() + phdr.sh_name, ".strtab") == 0; 
   });
   assert(phdr->sh_type == SHT_STRTAB && "Not a string table.");
   return make_span_of_section_data<char>(*phdr);
@@ -17,7 +17,7 @@ Span<char> ElfView::make_symbol_string_table() {
 
 Span<Elf64_Sym> ElfView::make_symbol_table() {
   Elf64_Shdr* phdr = find_single_in_span<Elf64_Shdr>(section_headers, [] (const Elf64_Shdr& phdr) { 
-    return phdr.sh_type == SHT_DYNSYM;
+    return phdr.sh_type == SHT_SYMTAB;
   });
   return make_span_of_section_data<Elf64_Sym>(*phdr);
 }
@@ -56,13 +56,19 @@ void ElfView::print_symbol_table() {
 Elf64_Sym* ElfView::resolve_symbol(const char* name) {
   auto& symbol_strtab = symbol_string_table;
 
-  DP("Resolving %s... ", name);
-  fflush(stdout);
-  Elf64_Sym* s = find_single_in_span<Elf64_Sym>(symbol_table, [name, &symbol_strtab] (const Elf64_Sym& sym) {
+  DP("Resolving %s... \n", name);
+
+  Elf64_Sym* ans = nullptr;
+  for (auto& sym : symbol_table) {
     const char* sym_name = symbol_strtab.begin() + sym.st_name;
-    bool ans = strcmp(sym_name, name) == 0;
-    return ans;
-  });
-  DP("Symbol resolved!\n");
-  return s;
+    if (strcmp(sym_name, name) == 0) {
+      assert(ans == nullptr && "Multiple symbols with that name!");
+      ans = &sym;
+    }
+  }
+  if (ans == nullptr)
+    DP("Symbol not found!\n");
+  else
+    DP("Symbol resolved!\n");
+  return ans;
 }

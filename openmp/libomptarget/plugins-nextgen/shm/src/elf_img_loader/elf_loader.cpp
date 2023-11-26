@@ -49,12 +49,16 @@ void ElfLoader::copy_segments_to_mem() {
     if (phdr.p_type == PT_LOAD && phdr.p_memsz > 0) {
       void* dst = (void*)(get_base_addr() + phdr.p_vaddr);
       void* src = (void*)(elf.get_addr() + phdr.p_offset);
-      size_t len = phdr.p_memsz;
-
-      assert(len == phdr.p_filesz && "This requires padding, which is not implemented.");
+      size_t len = phdr.p_filesz;
 
       printf("Copying from %lu bytes from %p to %p.\n", len, src, dst);
       std::memcpy(dst, src, len);
+
+      dst = (void*)((uintptr_t)dst + len);
+      len -= phdr.p_filesz;
+
+      printf("Padding with %lu bytes starting at %p.\n", len, src);
+      std::memset(dst, 0, len);
     }
   }
 }
@@ -77,12 +81,24 @@ llvm::Error ElfLoader::load() {
 void ElfLoader::single_rela_fixup(const Elf64_Shdr& phdr) {
   auto entries = elf.make_span_of_section_data<Elf64_Rela>(phdr);
 
+  auto dynsym = elf.make_span_of_section_data<Elf64_Sym>(*std::move(
+    find_single_in_span<Elf64_Shdr>(elf.get_section_headers(), [this](const Elf64_Shdr& s) {
+      return s.sh_type == SHT_DYNSYM && strcmp(elf.get_section_name(s), ".dynsym") == 0;
+    }))
+  );
+
+  auto dynstr = elf.make_span_of_section_data<char>(*std::move(
+    find_single_in_span<Elf64_Shdr>(elf.get_section_headers(), [this](const Elf64_Shdr& s) {
+      return s.sh_type == SHT_STRTAB && strcmp(elf.get_section_name(s), ".dynstr") == 0;
+    }))
+  );
+
   for (auto& rela : entries) {
     Elf64_Xword type = ELF64_R_TYPE(rela.r_info);
     Elf64_Xword sym_idx = ELF64_R_SYM(rela.r_info);
 
-    Elf64_Sym& sym = elf.get_symbol_table()[sym_idx];
-    char* name = elf.get_symbol_name(sym);
+    Elf64_Sym& sym = dynsym[sym_idx];
+    char* name = &dynstr[sym.st_name];
     DP("Relocating %s\n", name);
 
     uintptr_t* fixup_location = (uintptr_t*)(get_base_addr() + rela.r_offset);
@@ -118,6 +134,5 @@ void ElfLoader::fixup_relocations() {
 }
 
 llvm::Error ElfLoader::unload() {
-  unmapper(mapped_memory);
-  return make_success();
+  return unmapper(mapped_memory);
 }

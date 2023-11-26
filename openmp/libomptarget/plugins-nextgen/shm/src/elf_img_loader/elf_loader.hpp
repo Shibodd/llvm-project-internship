@@ -36,11 +36,13 @@ public:
   llvm::Error load();
   llvm::Error unload();
 
-  template <typename T>
-  T get_symbol_addr(const char* name) {
+  uintptr_t get_symbol_addr(const char* name) {
     Elf64_Sym* sym = elf.resolve_symbol(name);
+    if (sym == nullptr)
+      return 0;
+      
     uintptr_t addr = get_base_addr() + sym->st_value;
-    return (T)addr;
+    return addr;
   }
 };
 
