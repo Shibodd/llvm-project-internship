@@ -3,6 +3,7 @@
 
 #include "PluginInterface.h"
 #include "llvm/Frontend/OpenMP/OMPGridValues.h"
+#include "shm_api_wrap.hpp"
 #include "shm_debug.hpp"
 
 
@@ -50,7 +51,6 @@ struct ShmDeviceTy : public GenericDeviceTy {
   /// Initialize the device. After this call, the device should be already
   /// working and ready to accept queries or modifications.
   virtual Error initImpl(GenericPluginTy &Plugin) override {
-    SHM_NOT_IMPLEMENTED;
     return Plugin::success();
   }
 

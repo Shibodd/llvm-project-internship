@@ -12,6 +12,8 @@ add_llvm_library("omptarget.rtl.shm"
   SHARED
 
   ${CMAKE_CURRENT_SOURCE_DIR}/src/rtl.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/shm_api_wrap.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/shm_object.cpp
 
   ADDITIONAL_HEADER_DIRS
   ${LIBOMPTARGET_INCLUDE_DIR}

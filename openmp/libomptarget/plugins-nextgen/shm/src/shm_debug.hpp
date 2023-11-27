@@ -7,7 +7,6 @@
 #define SHM_DP(s, ...) DP("[%s] " s "\n", __func__ __VA_OPT__(,) __VA_ARGS__)
 #define SHM_NOT_IMPLEMENTED SHM_DP("Not implemented!\n")
 
-
 #ifdef SHM_TRACE_ENABLED
 #define SHM_TRACE_FN DP("Entering " __func__ ".")
 #else
