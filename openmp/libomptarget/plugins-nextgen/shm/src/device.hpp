@@ -3,8 +3,11 @@
 
 #include "PluginInterface.h"
 #include "llvm/Frontend/OpenMP/OMPGridValues.h"
-#include "shm_api_wrap.hpp"
 #include "shm_debug.hpp"
+#include "shm_allocator.hpp"
+#include "shm_object.hpp"
+#include "shm_err.hpp"
+#include "control_register.hpp"
 
 
 namespace llvm {
@@ -25,7 +28,10 @@ static constexpr GV HsmGridValues = {
 
 struct ShmDeviceTy : public GenericDeviceTy {
   ShmDeviceTy(int32_t DeviceId, int32_t NumDevices)
-      : GenericDeviceTy(DeviceId, NumDevices, HsmGridValues) {}
+      : GenericDeviceTy(DeviceId, NumDevices, HsmGridValues),
+        shm_object("/shm_dev" + std::to_string(DeviceId)),
+        shm_allocator(),
+        device_ctrl_reg(nullptr) {}
 
   /// Allocate a memory of size \p Size . \p HstPtr is used to assist the
   /// allocation.
@@ -51,6 +57,28 @@ struct ShmDeviceTy : public GenericDeviceTy {
   /// Initialize the device. After this call, the device should be already
   /// working and ready to accept queries or modifications.
   virtual Error initImpl(GenericPluginTy &Plugin) override {
+    SHM_TRACE_FN;
+
+    constexpr size_t MiB = 1024 * 1024;
+    if (auto err = shm_object.create(4*MiB))
+      return err;
+    
+    shm_allocator = MyAllocator(shm_object.get_span());
+    device_ctrl_reg = (ShmDeviceControlRegister*)shm_allocator.allocate(sizeof(ShmDeviceControlRegister));
+
+    if (device_ctrl_reg == nullptr) {
+      shm_object.unlink();
+      ASSERT_OR_ERR(false, "Failed to allocate Device Control Register!");
+    }
+
+    device_ctrl_reg->echo = 0;
+
+    while (device_ctrl_reg->echo == 0)
+    {
+
+    }
+    device_ctlr_reg->echo = 0;
+
     return Plugin::success();
   }
 
@@ -58,7 +86,12 @@ struct ShmDeviceTy : public GenericDeviceTy {
   /// device is no longer considered ready, so no queries or modifications are
   /// allowed.
   virtual Error deinitImpl() override {
-    SHM_NOT_IMPLEMENTED;
+    SHM_TRACE_FN;
+
+    shm_object.unlink();
+    device_ctrl_reg = nullptr;
+    shm_allocator = MyAllocator();
+    
     return Plugin::success();
   }
 
@@ -185,6 +218,9 @@ struct ShmDeviceTy : public GenericDeviceTy {
   }
 
 private:
+  ShmObject shm_object;
+  MyAllocator shm_allocator;
+  volatile ShmDeviceControlRegister* device_ctrl_reg;
 
   /// Allocate and construct a kernel object.
   virtual Expected<GenericKernelTy &>

@@ -26,13 +26,19 @@ public:
                                             GlobalTy &DeviceGlobal) override {
     SHM_NOT_IMPLEMENTED;
 
-    GlobalTy HostGlobal("__omp_rtl_device_environment", 0, nullptr);
-    if (auto err = getGlobalMetadataFromImage(Device, Image, HostGlobal)) 
-      DP("MYCODE Global not found\n");
-    else
-      DP("MYCODE Global found at %p\n", HostGlobal.getPtr());
+    SHM_DP("Looking for %s", DeviceGlobal.getName().c_str());
 
-    return Plugin::success();
+    GlobalTy ImageGlobal(DeviceGlobal);
+    if (auto err = getGlobalMetadataFromImage(Device, Image, ImageGlobal)) {
+      SHM_DP("Global not found\n");
+      return err;
+    }
+    else {
+      SHM_DP("Global found at %p", ImageGlobal.getPtr());
+      SHM_DP("Correct resolution not implemented!");
+      DeviceGlobal.setPtr(ImageGlobal.getPtr());
+      return Plugin::success();
+    }
   }
 };
 
