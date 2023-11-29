@@ -1,8 +1,8 @@
-#ifndef SHM_KERNEL_HPP
-#define SHM_KERNEL_HPP
+#ifndef RISCV_KERNEL_HPP
+#define RISCV_KERNEL_HPP
 
 #include "PluginInterface.h"
-#include "shm_debug.hpp"
+#include "debug_helpers.hpp"
 
 namespace llvm {
 namespace omp {
@@ -12,16 +12,16 @@ namespace plugin {
 /// Class implementing common functionalities of offload kernels. Each plugin
 /// should define the specific kernel class, derive from this generic one, and
 /// implement the necessary virtual function members.
-struct ShmKernelTy : public GenericKernelTy {
-  ShmKernelTy(const char *Name, OMPTgtExecModeFlags ExecMode)
+struct RiscvKernelTy : public GenericKernelTy {
+  RiscvKernelTy(const char *Name, OMPTgtExecModeFlags ExecMode)
       : GenericKernelTy(Name, ExecMode) {}
 
-  virtual ~ShmKernelTy() {}
+  virtual ~RiscvKernelTy() {}
 
   /// Initialize the kernel object from a specific device.
   virtual Error initImpl(GenericDeviceTy &GenericDevice,
                          DeviceImageTy &Image) override {
-    SHM_NOT_IMPLEMENTED;
+    RISCV_NOT_IMPLEMENTED;
     return Plugin::success();
   }
 
@@ -31,7 +31,7 @@ struct ShmKernelTy : public GenericKernelTy {
                            uint64_t NumBlocks, KernelArgsTy &KernelArgs,
                            void *Args,
                            AsyncInfoWrapperTy &AsyncInfoWrapper) const override {
-    SHM_NOT_IMPLEMENTED;
+    RISCV_NOT_IMPLEMENTED;
     return Plugin::success();
   }
 };
@@ -42,4 +42,4 @@ struct ShmKernelTy : public GenericKernelTy {
 } // namespace omp
 } // namespace llvm
 
-#endif // !SHM_DEVICE_HPP
+#endif // !RISCV_DEVICE_HPP

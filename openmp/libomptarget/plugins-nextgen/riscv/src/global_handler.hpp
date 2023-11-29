@@ -1,8 +1,8 @@
-#ifndef SHM_GLOBAL_HANDLER_HPP
-#define SHM_GLOBAL_HANDLER_HPP
+#ifndef RISCV_GLOBAL_HANDLER_HPP
+#define RISCV_GLOBAL_HANDLER_HPP
 
 #include "PluginInterface.h"
-#include "shm_debug.hpp"
+#include "debug_helpers.hpp"
 
 namespace llvm {
 namespace omp {
@@ -14,9 +14,9 @@ namespace plugin {
 /// which means the only things specialized by the subclass is the retrival of
 /// global metadata (size, addr) from the device.
 /// \see getGlobalMetadataFromDevice
-struct ShmGlobalHandlerTy : public GenericGlobalHandlerTy {
+struct RiscvGlobalHandlerTy : public GenericGlobalHandlerTy {
 public:
-  virtual ~ShmGlobalHandlerTy() {}
+  virtual ~RiscvGlobalHandlerTy() {}
 
   /// Get the address and size of a global from the device. Address is return in
   /// \p DeviceGlobal, the global name and expected size are passed in
@@ -24,13 +24,13 @@ public:
   virtual Error getGlobalMetadataFromDevice(GenericDeviceTy &Device,
                                             DeviceImageTy &Image,
                                             GlobalTy &DeviceGlobal) override {
-    SHM_NOT_IMPLEMENTED;
+    RISCV_NOT_IMPLEMENTED;
     return Plugin::success();
   }
 };
 
 GenericGlobalHandlerTy *Plugin::createGlobalHandler() {
-  return new ShmGlobalHandlerTy();
+  return new RiscvGlobalHandlerTy();
 }
 
 } // namespace plugin
@@ -38,4 +38,4 @@ GenericGlobalHandlerTy *Plugin::createGlobalHandler() {
 } // namespace omp
 } // namespace llvm
 
-#endif // !SHM_GLOBAL_HANDLER_HPP
+#endif // !RISCV_GLOBAL_HANDLER_HPP

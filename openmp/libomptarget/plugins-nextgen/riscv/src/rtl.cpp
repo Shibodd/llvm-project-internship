@@ -1,7 +1,7 @@
-struct ShmKernelTy;
-struct ShmDeviceTy;
-struct ShmPluginTy;
-struct ShmGlobalHandlerTy;
+struct RiscvKernelTy;
+struct RiscvDeviceTy;
+struct RiscvPluginTy;
+struct RiscvGlobalHandlerTy;
 #include "kernel.hpp"
 #include "device.hpp"
 #include "global_handler.hpp"
