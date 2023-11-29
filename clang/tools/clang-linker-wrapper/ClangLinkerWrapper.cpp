@@ -440,6 +440,18 @@ Expected<StringRef> clang(ArrayRef<StringRef> InputFiles, const ArgList &Args) {
 }
 } // namespace generic
 
+
+namespace riscv {
+Expected<StringRef> clang(ArrayRef<StringRef> InputFiles, const ArgList &Args) {
+  outs() << "Amogus\n";
+  for (auto& f : InputFiles) {
+    outs() << f.str() << '\n';
+  }
+  outs() << "Amogusgus\n";
+  return InputFiles[0];
+}
+} // namespace riscv
+
 Expected<StringRef> linkDevice(ArrayRef<StringRef> InputFiles,
                                const ArgList &Args) {
   const llvm::Triple Triple(Args.getLastArgValue(OPT_triple_EQ));
@@ -454,6 +466,8 @@ Expected<StringRef> linkDevice(ArrayRef<StringRef> InputFiles,
   case Triple::ppc64:
   case Triple::ppc64le:
     return generic::clang(InputFiles, Args);
+  case Triple::riscv64:
+    return riscv::clang(InputFiles, Args);
   default:
     return createStringError(inconvertibleErrorCode(),
                              Triple.getArchName() +
