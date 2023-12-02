@@ -44,8 +44,6 @@ struct RiscvPluginTy : GenericPluginTy {
   }
 };
 
-GenericPluginTy *Plugin::createPlugin() { return new RiscvPluginTy(); }
-
 } // namespace plugin
 } // namespace target
 } // namespace omp

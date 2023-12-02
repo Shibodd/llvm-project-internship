@@ -29,10 +29,6 @@ public:
   }
 };
 
-GenericGlobalHandlerTy *Plugin::createGlobalHandler() {
-  return new RiscvGlobalHandlerTy();
-}
-
 } // namespace plugin
 } // namespace target
 } // namespace omp

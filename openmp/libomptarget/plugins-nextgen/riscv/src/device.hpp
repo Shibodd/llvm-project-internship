@@ -221,10 +221,6 @@ private:
   }
 };
 
-GenericDeviceTy *Plugin::createDevice(int32_t DeviceId, int32_t NumDevices) {
-  return new RiscvDeviceTy(DeviceId, NumDevices);
-}
-
 } // namespace plugin
 } // namespace target
 } // namespace omp
