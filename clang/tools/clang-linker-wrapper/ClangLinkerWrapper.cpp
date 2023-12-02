@@ -390,8 +390,9 @@ Expected<StringRef> clang(ArrayRef<StringRef> InputFiles, const ArgList &Args) {
   for (StringRef InputFile : InputFiles)
     CmdArgs.push_back(InputFile);
 
+
   // If this is CPU offloading we copy the input libraries.
-  if (!Triple.isAMDGPU() && !Triple.isNVPTX()) {
+  if (!Triple.isRISCV64() && !Triple.isAMDGPU() && !Triple.isNVPTX()) {
     CmdArgs.push_back("-Wl,-Bsymbolic");
     CmdArgs.push_back("-shared");
     ArgStringList LinkerArgs;
@@ -412,12 +413,22 @@ Expected<StringRef> clang(ArrayRef<StringRef> InputFiles, const ArgList &Args) {
   if (Verbose)
     CmdArgs.push_back("-v");
 
-  if (!CudaBinaryPath.empty())
+  if (!Triple.isRISCV64() && !CudaBinaryPath.empty())
     CmdArgs.push_back(Args.MakeArgString("--cuda-path=" + CudaBinaryPath));
 
-  for (StringRef Arg : Args.getAllArgValues(OPT_ptxas_arg))
-    llvm::copy(SmallVector<StringRef>({"-Xcuda-ptxas", Arg}),
-               std::back_inserter(CmdArgs));
+  if (!Triple.isRISCV64()) {
+    for (StringRef Arg : Args.getAllArgValues(OPT_ptxas_arg))
+      llvm::copy(SmallVector<StringRef>({"-Xcuda-ptxas", Arg}),
+                std::back_inserter(CmdArgs));
+  }
+
+#define RISCV64_SYSROOT_DIR "/home/sbondi/workspace/riscv64-toolchain/riscv64-unknown-elf"
+#define RISCV64_BUILTINS_DIR "/home/sbondi/workspace/compiler-rt-build/install/lib/generic"
+  if (Triple.isRISCV64()) {
+    CmdArgs.push_back("--sysroot=" RISCV64_SYSROOT_DIR);
+    CmdArgs.push_back("-Wl,-rpath," RISCV64_BUILTINS_DIR);
+    CmdArgs.push_back("-L" RISCV64_BUILTINS_DIR);
+  }
 
   for (StringRef Arg : Args.getAllArgValues(OPT_linker_arg_EQ))
     CmdArgs.push_back(Args.MakeArgString("-Wl," + Arg));
@@ -436,21 +447,11 @@ Expected<StringRef> clang(ArrayRef<StringRef> InputFiles, const ArgList &Args) {
   if (Error Err = executeCommands(*ClangPath, CmdArgs))
     return std::move(Err);
 
+  outs() << "Linker action finished!\n";
+
   return *TempFileOrErr;
 }
 } // namespace generic
-
-
-namespace riscv {
-Expected<StringRef> clang(ArrayRef<StringRef> InputFiles, const ArgList &Args) {
-  outs() << "Amogus\n";
-  for (auto& f : InputFiles) {
-    outs() << f.str() << '\n';
-  }
-  outs() << "Amogusgus\n";
-  return InputFiles[0];
-}
-} // namespace riscv
 
 Expected<StringRef> linkDevice(ArrayRef<StringRef> InputFiles,
                                const ArgList &Args) {
@@ -465,9 +466,8 @@ Expected<StringRef> linkDevice(ArrayRef<StringRef> InputFiles,
   case Triple::aarch64_be:
   case Triple::ppc64:
   case Triple::ppc64le:
-    return generic::clang(InputFiles, Args);
   case Triple::riscv64:
-    return riscv::clang(InputFiles, Args);
+    return generic::clang(InputFiles, Args);
   default:
     return createStringError(inconvertibleErrorCode(),
                              Triple.getArchName() +
