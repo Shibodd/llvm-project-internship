@@ -38,8 +38,6 @@ struct RiscvPluginTy : GenericPluginTy {
   /// we could not move this function into GenericDeviceTy.
   virtual Expected<bool> isImageCompatible(__tgt_image_info *Info) const override {
     RISCV_TRACE_FN;
-    // TODO: check arch
-    RISCV_DP("%s", Info->Arch);
     return true;
   }
 };

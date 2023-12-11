@@ -32,7 +32,7 @@ using namespace llvm::omp::target;
 // List of all plugins that can support offloading.
 static const char *RTLNames[] = {
     /* PowerPC target       */ //"libomptarget.rtl.ppc64",
-    /* x86_64 target        */ //"libomptarget.rtl.x86_64",
+    /* x86_64 target        */ // "libomptarget.rtl.x86_64",
     /* CUDA target          */ //"libomptarget.rtl.cuda",
     /* AArch64 target       */ //"libomptarget.rtl.aarch64",
     /* AMDGPU target        */ //"libomptarget.rtl.amdgpu",

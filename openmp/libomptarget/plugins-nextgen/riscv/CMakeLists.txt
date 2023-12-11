@@ -4,6 +4,7 @@ libomptarget_say("Building RISCV NextGen offloading plugin.")
 
 add_llvm_library("omptarget.rtl.riscv" SHARED
   ${CMAKE_CURRENT_SOURCE_DIR}/src/rtl.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/riscvaccel/riscvaccel.cpp
   
   LINK_COMPONENTS
   Support

@@ -3,6 +3,7 @@
 
 #include "PluginInterface.h"
 #include "debug_helpers.hpp"
+#include "ELFSymbols.h"
 
 namespace llvm {
 namespace omp {
@@ -21,13 +22,26 @@ public:
   /// Get the address and size of a global from the device. Address is return in
   /// \p DeviceGlobal, the global name and expected size are passed in
   /// \p DeviceGlobal.
-  virtual Error getGlobalMetadataFromDevice(GenericDeviceTy &Device,
+  virtual Error getGlobalMetadataFromDevice(GenericDeviceTy &GenericDevice,
                                             DeviceImageTy &Image,
                                             GlobalTy &DeviceGlobal) override {
-    RISCV_NOT_IMPLEMENTED;
+    RISCV_TRACE_FN;
+    RiscvDeviceTy& Device = reinterpret_cast<RiscvDeviceTy&>(GenericDevice);
+
+    Expected<ELF64LEObjectFile> ElfOrErr = ELF64LEObjectFile::create(Image.getMemoryBuffer());
+    if (!ElfOrErr)
+      return ElfOrErr.takeError();
+
+    Expected<const ELF64LE::Sym*> SymOrErr = getELFSymbol(*ElfOrErr, DeviceGlobal.getName());
+    if (!SymOrErr)
+      return SymOrErr.takeError();
+
+    DeviceGlobal.setPtr((void*)((uint64_t)Device.getBaseAddress() + SymOrErr.get()->getValue()));
     return Plugin::success();
   }
 };
+
+
 
 } // namespace plugin
 } // namespace target
